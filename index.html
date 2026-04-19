@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#6366f1">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="HealthTracker">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <title>HealthTracker</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- Nav -->
+<nav class="nav">
+  <div class="nav-inner">
+    <div class="nav-logo">💪 HealthTracker</div>
+    <div class="nav-tabs">
+      <button class="nav-tab active" data-page="input">入力</button>
+      <button class="nav-tab" data-page="history">履歴</button>
+      <button class="nav-tab" data-page="chart">グラフ</button>
+      <button class="nav-tab" data-page="settings">設定</button>
+    </div>
+  </div>
+</nav>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<!-- ═══════════════ PAGE: 入力 ═══════════════ -->
+<div id="page-input" class="page active">
+  <div class="container">
+
+    <!-- Install banner -->
+    <div class="install-banner" id="install-banner">
+      <p>ホーム画面に追加してオフラインでも使えます</p>
+      <button class="btn btn-primary" id="install-btn" style="width:auto;padding:10px 20px;font-size:0.88rem">
+        ホーム画面に追加
+      </button>
+    </div>
+
+    <!-- Goal countdown card -->
+    <div class="goal-card" id="goal-card" style="display:none">
+      <div class="goal-card-inner">
+        <div class="goal-block">
+          <div class="goal-label">大会まで</div>
+          <div class="goal-value" id="goal-days">—</div>
+          <div class="goal-unit">日</div>
+          <div class="goal-sub" id="goal-date-label"></div>
+        </div>
+        <div class="goal-divider"></div>
+        <div class="goal-block">
+          <div class="goal-label">目標体重まで</div>
+          <div class="goal-value" id="goal-kg">—</div>
+          <div class="goal-unit">kg</div>
+          <div class="goal-sub" id="goal-weight-label"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Date picker -->
+    <div class="date-row">
+      <label>日付</label>
+      <input type="date" id="date-input">
+      <div class="date-nav">
+        <button id="prev-day" title="前日">‹</button>
+        <button id="next-day" title="翌日">›</button>
+      </div>
+    </div>
+
+    <!-- Body metrics -->
+    <div class="card">
+      <div class="card-title">体組成</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="weight">体重</label>
+          <div class="input-unit">
+            <input type="number" id="weight" placeholder="70.0" step="0.1" min="0" max="999" inputmode="decimal">
+            <span>kg</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="bodyFat">体脂肪率</label>
+          <div class="input-unit">
+            <input type="number" id="bodyFat" placeholder="20.0" step="0.1" min="0" max="100" inputmode="decimal">
+            <span>%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Calories & PFC -->
+    <div class="card">
+      <div class="card-title">カロリー・PFC</div>
+
+      <!-- PFC inputs -->
+      <div class="pfc-grid">
+        <div class="form-group">
+          <label for="protein">P タンパク質</label>
+          <div class="input-unit">
+            <input type="number" id="protein" placeholder="150" step="0.1" min="0" inputmode="decimal">
+            <span>g</span>
+          </div>
+          <span class="pfc-kcal-hint" id="p-kcal"></span>
+        </div>
+        <div class="form-group">
+          <label for="fat">F 脂質</label>
+          <div class="input-unit">
+            <input type="number" id="fat" placeholder="60" step="0.1" min="0" inputmode="decimal">
+            <span>g</span>
+          </div>
+          <span class="pfc-kcal-hint" id="f-kcal"></span>
+        </div>
+        <div class="form-group">
+          <label for="carbs">C 炭水化物</label>
+          <div class="input-unit">
+            <input type="number" id="carbs" placeholder="200" step="0.1" min="0" inputmode="decimal">
+            <span>g</span>
+          </div>
+          <span class="pfc-kcal-hint" id="c-kcal"></span>
+        </div>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <!-- Calorie total -->
+      <div class="cal-total-row">
+        <div class="form-group" style="flex:1">
+          <div class="cal-label-row">
+            <label for="calories">カロリー合計</label>
+            <span class="cal-mode-badge" id="cal-mode-badge">自動計算</span>
+          </div>
+          <div class="input-unit">
+            <input type="number" id="calories" placeholder="2000" step="1" min="0" max="99999" inputmode="numeric">
+            <span>kcal</span>
+          </div>
+        </div>
+      </div>
+      <div class="cal-breakdown" id="cal-breakdown"></div>
+    </div>
+
+    <!-- Screenshot analysis -->
+    <div class="card ss-card" id="ss-card">
+      <div class="card-title-row">
+        <span class="card-title" style="margin-bottom:0">スクリーンショット解析</span>
+        <span class="ai-badge">AI</span>
+      </div>
+      <div class="ss-zone" id="ss-zone" tabindex="0" role="button">
+        <input type="file" id="ss-file" accept="image/*" style="display:none">
+        <!-- idle -->
+        <div class="ss-state" id="ss-idle">
+          <div class="ss-icon">📸</div>
+          <div class="ss-main">スクリーンショットを貼り付け</div>
+          <div class="ss-sub">またはタップして画像を選択 · ドラッグ&ドロップ</div>
+        </div>
+        <!-- loading -->
+        <div class="ss-state" id="ss-loading" style="display:none">
+          <div class="ss-spinner"></div>
+          <div class="ss-main">AIが解析中…</div>
+        </div>
+        <!-- result -->
+        <div class="ss-state" id="ss-result" style="display:none">
+          <div class="ss-icon" style="color:var(--success)">✓</div>
+          <div class="ss-main" id="ss-result-text"></div>
+          <div class="ss-sub">タップして別の画像を選択</div>
+        </div>
+        <!-- error -->
+        <div class="ss-state" id="ss-error" style="display:none">
+          <div class="ss-icon" style="color:var(--warn)">⚠</div>
+          <div class="ss-main" id="ss-error-text"></div>
+          <div class="ss-sub">タップして再試行</div>
+        </div>
+      </div>
+      <div class="ss-no-key" id="ss-no-key" style="display:none">
+        設定から <strong>Claude APIキー</strong> を入力するとAI解析が使えます
+      </div>
+    </div>
+
+    <!-- Memo -->
+    <div class="card">
+      <div class="card-title">メモ</div>
+      <div class="form-group">
+        <input type="text" id="memo" placeholder="今日の調子、食事内容など…" maxlength="200">
+      </div>
+    </div>
+
+    <button class="btn btn-primary" id="save-btn">保存する</button>
+
+    <!-- Today summary -->
+    <div style="margin-top:24px">
+      <div class="card-title" style="margin-bottom:12px">本日のサマリー</div>
+
+      <!-- 体重・体脂肪 -->
+      <div class="summary-grid" style="margin-bottom:12px">
+        <div class="stat-card accent">
+          <div class="stat-label">体重</div>
+          <div class="stat-value" id="sum-weight">—</div>
+          <div class="stat-unit">kg</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">体脂肪率</div>
+          <div class="stat-value" id="sum-fat">—</div>
+          <div class="stat-unit">%</div>
+        </div>
+      </div>
+
+      <!-- 目標との比較 -->
+      <div class="card">
+        <div class="card-title">目標との比較</div>
+        <div class="tc-list">
+
+          <!-- カロリー -->
+          <div class="tc-row" id="tc-row-cal">
+            <div class="tc-top">
+              <span class="tc-name">カロリー</span>
+              <span class="tc-actual" id="tc-cal-actual">—</span>
+              <span class="tc-sep" id="tc-cal-sep" style="display:none">/ <span id="tc-cal-target"></span> kcal</span>
+              <span class="tc-diff" id="tc-cal-diff"></span>
+            </div>
+            <div class="tc-bar-bg"><div class="tc-bar-fill tc-bar-cal" id="tc-cal-bar" style="width:0%"></div></div>
+            <div class="tc-pfc-sub" id="tc-pfc-sub"></div>
+          </div>
+
+          <div class="tc-divider"></div>
+
+          <!-- P -->
+          <div class="tc-row">
+            <div class="tc-top">
+              <span class="tc-name"><span class="tc-badge tc-p">P</span> タンパク質</span>
+              <span class="tc-actual" id="tc-p-actual">—</span>
+              <span class="tc-sep" id="tc-p-sep" style="display:none">/ <span id="tc-p-target"></span> g</span>
+              <span class="tc-diff" id="tc-p-diff"></span>
+            </div>
+            <div class="tc-bar-bg"><div class="tc-bar-fill tc-bar-p" id="tc-p-bar" style="width:0%"></div></div>
+          </div>
+
+          <!-- F -->
+          <div class="tc-row">
+            <div class="tc-top">
+              <span class="tc-name"><span class="tc-badge tc-f">F</span> 脂質</span>
+              <span class="tc-actual" id="tc-f-actual">—</span>
+              <span class="tc-sep" id="tc-f-sep" style="display:none">/ <span id="tc-f-target"></span> g</span>
+              <span class="tc-diff" id="tc-f-diff"></span>
+            </div>
+            <div class="tc-bar-bg"><div class="tc-bar-fill tc-bar-f" id="tc-f-bar" style="width:0%"></div></div>
+          </div>
+
+          <!-- C -->
+          <div class="tc-row">
+            <div class="tc-top">
+              <span class="tc-name"><span class="tc-badge tc-c">C</span> 炭水化物</span>
+              <span class="tc-actual" id="tc-c-actual">—</span>
+              <span class="tc-sep" id="tc-c-sep" style="display:none">/ <span id="tc-c-target"></span> g</span>
+              <span class="tc-diff" id="tc-c-diff"></span>
+            </div>
+            <div class="tc-bar-bg"><div class="tc-bar-fill tc-bar-c" id="tc-c-bar" style="width:0%"></div></div>
+          </div>
+
+        </div>
+
+        <!-- PFC balance bar -->
+        <div class="pfc-bar-wrap" style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border)">
+          <div class="pfc-bar-labels">
+            <span style="font-size:0.75rem;color:var(--text2)">PFCバランス</span>
+            <span id="pfc-pct" style="font-size:0.75rem;color:var(--text2)"></span>
+          </div>
+          <div class="pfc-bar" style="margin-top:6px">
+            <div class="pfc-bar-p" id="bar-p" style="width:0%"></div>
+            <div class="pfc-bar-f" id="bar-f" style="width:0%"></div>
+            <div class="pfc-bar-c" id="bar-c" style="width:0%"></div>
+          </div>
+          <div class="pfc-bar-legend">
+            <span><i class="dot dot-p"></i>P</span>
+            <span><i class="dot dot-f"></i>F</span>
+            <span><i class="dot dot-c"></i>C</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════ PAGE: 履歴 ═══════════════ -->
+<div id="page-history" class="page">
+  <div class="container">
+    <div class="history-filters">
+      <button class="filter-btn active" data-filter="all">すべて</button>
+      <button class="filter-btn" data-filter="7">直近7日</button>
+      <button class="filter-btn" data-filter="30">直近30日</button>
+    </div>
+    <div class="history-list" id="history-list">
+      <div class="empty-state"><div class="icon">📋</div><p>記録がありません</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ PAGE: グラフ ═══════════════ -->
+<div id="page-chart" class="page">
+  <div class="container">
+
+    <!-- Metric selector -->
+    <div class="card chart-controls">
+      <div class="chart-control-row">
+        <span class="chart-control-label">指標</span>
+        <div class="chart-btn-group" id="metric-btns">
+          <button class="chart-toggle active" data-metric="both">体重＋体脂肪</button>
+          <button class="chart-toggle" data-metric="weight">体重</button>
+          <button class="chart-toggle" data-metric="bodyFat">体脂肪率</button>
+          <button class="chart-toggle" data-metric="calories">カロリー</button>
+          <button class="chart-toggle" data-metric="protein">P</button>
+          <button class="chart-toggle" data-metric="fat">F</button>
+          <button class="chart-toggle" data-metric="carbs">C</button>
+        </div>
+      </div>
+      <div class="chart-control-row" style="margin-top:10px">
+        <span class="chart-control-label">期間</span>
+        <div class="chart-btn-group" id="period-btns">
+          <button class="chart-toggle active" data-period="daily">日次</button>
+          <button class="chart-toggle" data-period="weekly">週次</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats row (body composition only) -->
+    <div class="chart-stats" id="chart-stats" style="display:none">
+      <div class="chart-stat-item">
+        <span class="chart-stat-label">直近体重</span>
+        <span class="chart-stat-val" id="cs-weight-latest">—</span>
+      </div>
+      <div class="chart-stat-item">
+        <span class="chart-stat-label">期間変化</span>
+        <span class="chart-stat-val" id="cs-weight-diff">—</span>
+      </div>
+      <div class="chart-stat-item">
+        <span class="chart-stat-label">直近体脂肪</span>
+        <span class="chart-stat-val" id="cs-fat-latest">—</span>
+      </div>
+      <div class="chart-stat-item">
+        <span class="chart-stat-label">期間変化</span>
+        <span class="chart-stat-val" id="cs-fat-diff">—</span>
+      </div>
+    </div>
+
+    <!-- Chart canvas -->
+    <div class="card">
+      <div id="chart-legend" class="chart-legend"></div>
+      <div class="chart-wrap" style="height:320px">
+        <canvas id="myChart"></canvas>
+        <div id="chart-empty" class="empty-state" style="display:none">
+          <div class="icon">📈</div><p>データがありません</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════ PAGE: 設定 ═══════════════ -->
+<div id="page-settings" class="page">
+  <div class="container">
+
+    <!-- AI設定 -->
+    <div class="card">
+      <div class="card-title">AI解析（スクリーンショット）</div>
+      <div class="settings-row">
+        <div>
+          <label>Claude APIキー</label>
+          <span>カロミルなどのスクリーンショットから自動入力</span>
+        </div>
+        <div class="api-key-wrap">
+          <input class="settings-input" type="password" id="set-api-key"
+            placeholder="sk-ant-..." style="width:160px;text-align:left;font-size:0.75rem;letter-spacing:0.02em">
+          <button class="api-key-toggle" id="api-key-toggle" title="表示/非表示">👁</button>
+        </div>
+      </div>
+      <p style="font-size:0.72rem;color:var(--text2);margin-top:8px;line-height:1.6">
+        APIキーはこのデバイスのみに保存されます。<br>
+        <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener"
+          style="color:var(--accent2)">console.anthropic.com</a> で取得できます。
+      </p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">大会・目標体重</div>
+      <div class="settings-row">
+        <div><label>大会日</label><span>カウントダウン表示する日付</span></div>
+        <input class="settings-input" type="date" id="set-event-date" style="width:150px;text-align:left;padding:8px 10px">
+      </div>
+      <div class="settings-row">
+        <div><label>大会名（任意）</label></div>
+        <input class="settings-input" type="text" id="set-event-name" placeholder="大会名" style="width:150px;text-align:left">
+      </div>
+      <div class="settings-row">
+        <div><label>目標体重</label></div>
+        <div class="input-unit" style="width:90px">
+          <input class="settings-input" type="number" id="set-goal-weight" inputmode="decimal" step="0.1" placeholder="65.0">
+          <span style="right:8px">kg</span>
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:-4px">
+      <div class="card-title">目標値</div>
+      <div class="settings-row">
+        <div><label>目標カロリー</label><span>1日の摂取カロリー目標</span></div>
+        <div class="input-unit" style="width:110px">
+          <input class="settings-input" type="number" id="set-calories" inputmode="numeric">
+          <span style="right:8px">kcal</span>
+        </div>
+      </div>
+      <div class="settings-row">
+        <div><label>タンパク質目標</label></div>
+        <div class="input-unit" style="width:90px">
+          <input class="settings-input" type="number" id="set-protein" inputmode="numeric">
+          <span style="right:8px">g</span>
+        </div>
+      </div>
+      <div class="settings-row">
+        <div><label>脂質目標</label></div>
+        <div class="input-unit" style="width:90px">
+          <input class="settings-input" type="number" id="set-fat" inputmode="numeric">
+          <span style="right:8px">g</span>
+        </div>
+      </div>
+      <div class="settings-row">
+        <div><label>炭水化物目標</label></div>
+        <div class="input-unit" style="width:90px">
+          <input class="settings-input" type="number" id="set-carbs" inputmode="numeric">
+          <span style="right:8px">g</span>
+        </div>
+      </div>
+    </div>
+    <button class="btn btn-primary" id="settings-save" style="margin-bottom:12px">設定を保存</button>
+
+    <div class="card">
+      <div class="card-title">データ管理</div>
+      <div class="settings-row">
+        <div><label>CSVエクスポート</label><span>全データをCSV形式でダウンロード</span></div>
+        <button class="btn btn-primary" id="export-btn" style="width:auto;padding:8px 16px;font-size:0.85rem">書き出し</button>
+      </div>
+      <div class="settings-row">
+        <div><label>データ削除</label><span>すべての記録を削除します</span></div>
+        <button class="btn btn-danger" id="clear-btn" style="width:auto;padding:8px 16px;font-size:0.85rem">削除</button>
+      </div>
+    </div>
+
+    <p style="font-size:0.75rem;color:var(--text2);text-align:center;margin-top:8px">
+      データはこのデバイスのブラウザにのみ保存されます
+    </p>
+  </div>
+</div>
+
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
