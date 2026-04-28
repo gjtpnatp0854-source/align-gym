@@ -1,8 +1,6 @@
-const CACHE_NAME = 'healthtracker-v1';
+const CACHE_NAME = 'align-v1';
 const ASSETS = [
   './index.html',
-  './style.css',
-  './app.js',
   './manifest.json'
 ];
 

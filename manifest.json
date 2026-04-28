@@ -1,11 +1,11 @@
 {
-  "name": "HealthTracker",
-  "short_name": "HealthTracker",
-  "description": "体重・体脂肪・カロリー・PFC記録アプリ",
+  "name": "パーソナルジム ALIGN",
+  "short_name": "ALIGN",
+  "description": "田代和昭のパーソナルトレーニング｜池袋・新宿・立川・横浜",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#0f172a",
-  "theme_color": "#6366f1",
+  "background_color": "#111111",
+  "theme_color": "#111111",
   "orientation": "portrait",
   "icons": [
     {
