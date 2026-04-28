@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://gjtpnatp0854-source.github.io/health-tracker/sitemap.xml
