@@ -285,6 +285,22 @@
       .trainer-inner { grid-template-columns: 1fr; gap: 2rem; }
     }
 
+    .trainer-photos {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .trainer-photo-sub {
+      width: 100%;
+      aspect-ratio: 4/3;
+      object-fit: cover;
+      object-position: center 45%;
+      border-radius: 4px;
+      display: block;
+      filter: grayscale(20%);
+    }
+
     .trainer-photo-wrap {
       position: relative;
       flex-shrink: 0;
@@ -1011,8 +1027,11 @@
     <h2 class="section-title">トレーナー紹介</h2>
     <div class="divider"></div>
     <div class="trainer-inner">
-      <div class="trainer-photo-wrap">
-        <img class="trainer-photo" src="./画像素材/IMG_5187.jpg" alt="トレーナー田代和昭" loading="lazy">
+      <div class="trainer-photos">
+        <div class="trainer-photo-wrap">
+          <img class="trainer-photo" src="./画像素材/physique-1.jpg" alt="フィジーク大会に出場するトレーナー田代和昭" loading="lazy">
+        </div>
+        <img class="trainer-photo-sub" src="./画像素材/physique-2.jpg" alt="フィジーク大会のステージで並ぶトレーナー田代和昭(中央・152番)" loading="lazy">
       </div>
       <div class="trainer-text">
         <div class="trainer-name-block">

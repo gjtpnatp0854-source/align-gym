@@ -1,4 +1,4 @@
-const CACHE_NAME = 'align-v1';
+const CACHE_NAME = 'align-v2';
 const ASSETS = [
   './index.html',
   './manifest.json'
